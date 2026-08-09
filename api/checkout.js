@@ -51,6 +51,10 @@ module.exports = async function handler(req, res) {
       success_url: `${siteUrl}/#/confirmation/{CHECKOUT_SESSION_ID}`,
       cancel_url: `${siteUrl}/#/cart`,
       metadata: { cart: JSON.stringify(cartMeta) },
+      // This account has Stripe Managed Payments on by default, which requires a
+      // tax code on every product unless disabled — irrelevant for digital goods
+      // priced ad-hoc via price_data, so it's turned off for this session.
+      managed_payments: { enabled: false },
     });
 
     res.status(200).json({ url: session.url });
