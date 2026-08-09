@@ -1,0 +1,13 @@
+{
+  "name": "storefront",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Digital-goods storefront: static frontend + Vercel serverless API backed by Postgres, Stripe, Resend and Supabase Storage.",
+  "dependencies": {
+    "pg": "^8.11.5",
+    "stripe": "^16.2.0",
+    "resend": "^3.4.0",
+    "jsonwebtoken": "^9.0.2",
+    "@supabase/supabase-js": "^2.44.4"
+  }
+}
