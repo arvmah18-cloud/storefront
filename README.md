@@ -86,3 +86,5 @@ functions together, which a plain static server won't. Copy
    domain.
 6. In the admin panel, set each product's Storage File Key to match what
    you uploaded in step 4.
+
+Deployed via Vercel.
