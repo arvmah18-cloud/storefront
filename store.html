@@ -1134,7 +1134,7 @@ async function loadDownloadStatus(token){
   if(!root) return;
   let status;
   try{
-    status = await api('/api/download-status?token='+encodeURIComponent(token));
+    status = await api('/api/download?status=1&token='+encodeURIComponent(token));
   }catch(e){
     status = {valid:false, reason:'not_found'};
   }
@@ -1602,7 +1602,7 @@ function bindAdminTabEvents(){
     document.getElementById('settingsForm').addEventListener('submit', async (e)=>{
       e.preventDefault();
       try{
-        SETTINGS = await api('/api/admin/settings', {method:'PUT', body:JSON.stringify({
+        SETTINGS = await api('/api/settings', {method:'PUT', body:JSON.stringify({
           storeName: document.getElementById('sfName').value,
           tagline: document.getElementById('sfTagline').value,
           supportEmail: document.getElementById('sfEmail').value,

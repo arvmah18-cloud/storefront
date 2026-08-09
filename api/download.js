@@ -1,6 +1,44 @@
 const db = require('../lib/db');
 const { createSignedDownloadUrl } = require('../lib/storage');
 
+async function lookup(token) {
+  const { rows } = await db.query(
+    `select oi.id, oi.token_expires_at, oi.max_downloads, oi.downloads_used, o.status, p.file_key, p.name
+     from order_items oi
+     join orders o on o.id = oi.order_id
+     join products p on p.id = oi.product_id
+     where oi.download_token = $1`,
+    [token]
+  );
+  return rows[0];
+}
+
+// Read-only status check, used by the #/download/:token landing page before
+// the real download link is clicked — so an email client's link-preview bot
+// can't silently burn through the download cap.
+async function handleStatus(req, res, token) {
+  const item = await lookup(token);
+  if (!item || item.status !== 'paid') {
+    res.status(404).json({ valid: false, reason: 'not_found' });
+    return;
+  }
+  if (new Date(item.token_expires_at) < new Date()) {
+    res.status(200).json({ valid: false, reason: 'expired', name: item.name });
+    return;
+  }
+  if (item.downloads_used >= item.max_downloads) {
+    res.status(200).json({ valid: false, reason: 'exhausted', name: item.name });
+    return;
+  }
+  res.status(200).json({
+    valid: true,
+    name: item.name,
+    expiresAt: item.token_expires_at,
+    maxDownloads: item.max_downloads,
+    downloadsUsed: item.downloads_used,
+  });
+}
+
 module.exports = async function handler(req, res) {
   if (req.method !== 'GET') {
     res.status(405).end();
@@ -13,16 +51,12 @@ module.exports = async function handler(req, res) {
     return;
   }
 
-  const { rows } = await db.query(
-    `select oi.id, oi.product_id, oi.token_expires_at, oi.max_downloads, oi.downloads_used, o.status, p.file_key, p.name
-     from order_items oi
-     join orders o on o.id = oi.order_id
-     join products p on p.id = oi.product_id
-     where oi.download_token = $1`,
-    [token]
-  );
+  if (req.query.status) {
+    await handleStatus(req, res, token);
+    return;
+  }
 
-  const item = rows[0];
+  const item = await lookup(token);
   if (!item || item.status !== 'paid') {
     res.status(404).send('Download link not found.');
     return;
