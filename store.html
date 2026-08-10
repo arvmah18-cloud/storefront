@@ -614,6 +614,7 @@ const MARQUEE_ITEMS = ['Free Worldwide Shipping','Premium Quality Guaranteed','F
    STATE
    ============================================================ */
 let PRODUCTS = [];
+let PRODUCTS_ERROR = false;
 let SETTINGS = {...DEFAULT_SETTINGS};
 let CART = []; // [{id, qty}]
 let ADMIN_AUTHED = false;
@@ -641,12 +642,23 @@ function saveCart(){ localStorage.setItem('cart', JSON.stringify(CART)); }
 
 async function loadAll(){
   const [productsRes, settingsRes] = await Promise.all([
-    api('/api/products').catch(()=>({products:[]})),
+    api('/api/products').catch(()=>{ PRODUCTS_ERROR = true; return {products:[]}; }),
     api('/api/settings').catch(()=>DEFAULT_SETTINGS)
   ]);
   PRODUCTS = productsRes.products || [];
   SETTINGS = {...DEFAULT_SETTINGS, ...settingsRes};
   CART = loadCart();
+}
+
+async function reloadProducts(){
+  try{
+    const r = await api('/api/products');
+    PRODUCTS = r.products || [];
+    PRODUCTS_ERROR = false;
+  }catch(e){
+    PRODUCTS_ERROR = true;
+  }
+  render();
 }
 
 /* ============================================================
@@ -780,6 +792,7 @@ function viewHome(){
     </div>
   </section>
 
+  ${featured.length > 0 ? `
   <section class="section" style="padding-top:0;">
     <div class="wrap">
       <div class="section-head reveal">
@@ -792,7 +805,7 @@ function viewHome(){
       </div>
       <div class="center mt-lg reveal"><a href="#/catalog" class="btn btn--outline">View Full Catalog</a></div>
     </div>
-  </section>
+  </section>` : ''}
 
   <section class="section">
     <div class="wrap">
@@ -824,12 +837,18 @@ function viewCatalog(){
         <h2>Every supplier guide</h2>
         <p>Filter by category or browse the full set. Click any product for full details.</p>
       </div>
+      ${PRODUCTS.length === 0 ? `
+      <div class="empty-state">
+        ${icon('bag')}
+        <p>${PRODUCTS_ERROR ? "Couldn't load the catalog — check your connection and try again." : "No products yet."}</p>
+        ${PRODUCTS_ERROR ? `<button class="btn btn--outline mt-lg" id="retryProductsBtn">Try Again</button>` : ''}
+      </div>` : `
       <div class="chips" id="catalogChips">
         ${cats.map(c=>`<button class="chip ${c==='all'?'active':''}" data-cat="${c}">${c==='all'?'All':capitalize(c)}</button>`).join('')}
       </div>
       <div class="grid-products reveal" id="catalogGrid">
         ${PRODUCTS.map(productCard).join('')}
-      </div>
+      </div>`}
     </div>
   </section>`;
 }
@@ -1555,6 +1574,8 @@ function bindViewEvents(route){
         document.getElementById('catalogGrid').innerHTML = filtered.map(productCard).join('');
       });
     });
+    const retryBtn = document.getElementById('retryProductsBtn');
+    if(retryBtn) retryBtn.addEventListener('click', reloadProducts);
   }
 
   // cart page line controls
