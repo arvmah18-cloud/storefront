@@ -420,17 +420,6 @@ label{display:block;font-size:.72rem;letter-spacing:.08em;text-transform:upperca
 .reveal.in-view{opacity:1;transform:translateY(0);}
 .mt-lg{margin-top:3rem;}
 
-/* staggered cascade for grid children on reveal */
-.grid-products.reveal .card-product,.reviews-grid.reveal .review-card{opacity:0;transform:translateY(20px);transition:opacity .6s var(--ease),transform .6s var(--ease);}
-.grid-products.reveal.in-view .card-product,.reviews-grid.reveal.in-view .review-card{opacity:1;transform:translateY(0);}
-.grid-products.reveal.in-view .card-product:nth-child(1),.reviews-grid.reveal.in-view .review-card:nth-child(1){transition-delay:.03s;}
-.grid-products.reveal.in-view .card-product:nth-child(2),.reviews-grid.reveal.in-view .review-card:nth-child(2){transition-delay:.08s;}
-.grid-products.reveal.in-view .card-product:nth-child(3),.reviews-grid.reveal.in-view .review-card:nth-child(3){transition-delay:.13s;}
-.grid-products.reveal.in-view .card-product:nth-child(4),.reviews-grid.reveal.in-view .review-card:nth-child(4){transition-delay:.18s;}
-.grid-products.reveal.in-view .card-product:nth-child(5),.reviews-grid.reveal.in-view .review-card:nth-child(5){transition-delay:.23s;}
-.grid-products.reveal.in-view .card-product:nth-child(6),.reviews-grid.reveal.in-view .review-card:nth-child(6){transition-delay:.28s;}
-.grid-products.reveal.in-view .card-product:nth-child(n+7),.reviews-grid.reveal.in-view .review-card:nth-child(n+7){transition-delay:.32s;}
-@media (prefers-reduced-motion:reduce){.grid-products.reveal .card-product,.reviews-grid.reveal .review-card{transition-delay:0s !important;}}
 .center{text-align:center;}
 .view{display:none;}
 .view.active{display:block;}
@@ -1850,7 +1839,12 @@ function setupReveal(){
       if(entry.isIntersecting){ entry.target.classList.add('in-view'); obs.unobserve(entry.target); }
     });
   }, {threshold:.12});
-  els.forEach(el=>obs.observe(el));
+  els.forEach(el=>{
+    obs.observe(el);
+    // Safety net: guarantee content becomes visible even if the observer
+    // never fires on some device/browser — never let styling hide real content.
+    setTimeout(()=>el.classList.add('in-view'), 1200);
+  });
 }
 
 /* ============================================================
