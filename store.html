@@ -1205,17 +1205,51 @@ function viewContact(){
    LEGAL MODALS
    ============================================================ */
 const LEGAL_CONTENT = {
-  terms:{title:'Terms of Service', body:`These are placeholder Terms of Service for demonstration purposes. Cover, at minimum: what is being sold (digital access/information products), that all sales of digital goods are final except where required otherwise by law, delivery method and timing, account/download link usage limits, prohibited uses, and dispute resolution.`},
-  notice:{title:'Legal Notice', body:`Placeholder Legal Notice. Include your registered business name, business address, jurisdiction of registration, and a contact method, as required by the laws of the countries you operate in and sell to.`},
-  privacy:{title:'Privacy Policy', body:`Placeholder Privacy Policy. Describe what personal data is collected (e.g. name, email, payment metadata handled by your payment processor), why it's collected, how long it's kept, whether it's shared with processors (payment, email delivery), and how customers can request deletion or export.`}
+  terms:{title:'Terms of Service', body:`
+    <p>These Terms of Service ("Terms") govern purchases made from <span data-fill="storeName"></span> ("we", "us"). By placing an order you agree to these Terms.</p>
+    <h4>What we sell</h4>
+    <p>We sell digital access/information products — downloadable guides and reference files. No physical goods are shipped. Nothing purchased here grants any affiliation with, endorsement by, or authorization from any third-party brand referenced in a product's description.</p>
+    <h4>Delivery</h4>
+    <p>Once payment is confirmed, a secure download link is generated automatically and sent to the email address provided at checkout, and shown on the order confirmation page. Each link expires after 72 hours or a limited number of downloads, whichever comes first. If a link stops working, contact us and we'll issue a new one.</p>
+    <h4>Right of withdrawal — digital content</h4>
+    <p>Where applicable law grants a right of withdrawal for online purchases (for example, EU/EEA consumers), that right is typically lost once a digital download begins, provided we have your prior express consent to that immediate delivery and your acknowledgment that the withdrawal right is thereby lost. By completing checkout and requesting immediate delivery, you provide that consent. This does not affect any other statutory right that cannot be waived.</p>
+    <h4>Refunds</h4>
+    <p>Because delivery is instant and irreversible, sales are final except: (a) where required by law, (b) if the file delivered is materially defective or does not match its listing, or (c) if delivery failed entirely and no working link could be issued. Refund requests should be sent to our support email with the order number.</p>
+    <h4>Prohibited use</h4>
+    <p>Download links are for the purchaser's own use. Redistributing, reselling, or publicly sharing purchased files without our written permission is prohibited and may result in access being revoked without refund.</p>
+    <h4>Disputes</h4>
+    <p>Contact us first at <span data-fill="supportEmail"></span> so we can try to resolve any issue directly. These Terms are governed by the laws of [YOUR COUNTRY/JURISDICTION].</p>
+  `},
+  notice:{title:'Legal Notice', body:`
+    <p><strong>Business name:</strong> [YOUR LEGAL BUSINESS NAME]</p>
+    <p><strong>Registered address:</strong> [YOUR REGISTERED BUSINESS ADDRESS]</p>
+    <p><strong>Business/organization number:</strong> [REGISTRATION NUMBER, IF APPLICABLE]</p>
+    <p><strong>Jurisdiction:</strong> [COUNTRY OF REGISTRATION]</p>
+    <p><strong>Contact:</strong> <span data-fill="supportEmail"></span></p>
+    <p>This site is operated by the business named above. If you have a legal notice, complaint, or takedown request, please use the contact above.</p>
+  `},
+  privacy:{title:'Privacy Policy', body:`
+    <h4>What we collect</h4>
+    <p>When you make a purchase, we collect the email address you provide and order details (items purchased, amount, timestamp). Payment card details are entered directly into Stripe's checkout page and are never seen or stored by us. If you contact support, we collect your name, email, and message.</p>
+    <h4>Why we collect it</h4>
+    <p>To deliver your purchase, respond to support requests, and maintain order records. We do not sell personal data.</p>
+    <h4>Who it's shared with</h4>
+    <p>Payment processing: Stripe. Email delivery: Resend. File storage: Supabase. Each processes data only as needed to provide their service to us, under their own privacy policies.</p>
+    <h4>How long we keep it</h4>
+    <p>Order records are kept as long as needed for accounting, legal, and support purposes, or until you request deletion where legally permitted.</p>
+    <h4>Your rights</h4>
+    <p>You can request a copy of your data or ask us to delete it (subject to legal recordkeeping requirements) by emailing <span data-fill="supportEmail"></span>.</p>
+  `}
 };
 function openLegal(key){
   const c = LEGAL_CONTENT[key];
   document.getElementById('modalContent').innerHTML = `
     <h3>${c.title}</h3>
-    <div class="modal__disclaimer">${icon('checkCircle')} This is placeholder text to show where this content goes. Replace it with real terms reviewed by a lawyer in your jurisdiction before launch.</div>
-    <p>${c.body}</p>
+    <div class="modal__disclaimer">${icon('checkCircle')} General starting template — have this reviewed by a lawyer in your jurisdiction, and fill in the bracketed business details, before relying on it commercially.</div>
+    ${c.body}
     <button class="btn btn--outline modal__close-btn" id="modalCloseBtn">Close</button>`;
+  document.getElementById('modalContent').querySelectorAll('[data-fill="supportEmail"]').forEach(el=>{ el.textContent = SETTINGS.supportEmail; });
+  document.getElementById('modalContent').querySelectorAll('[data-fill="storeName"]').forEach(el=>{ el.textContent = SETTINGS.storeName; });
   document.getElementById('modalOverlay').classList.add('open');
 }
 function closeLegal(){ document.getElementById('modalOverlay').classList.remove('open'); }
