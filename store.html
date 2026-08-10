@@ -448,12 +448,6 @@ label{display:block;font-size:.72rem;letter-spacing:.08em;text-transform:upperca
           <li><a href="#/admin" data-route="admin">Admin</a></li>
         </ul>
       </div>
-      <div>
-        <h5>Community</h5>
-        <ul>
-          <li><a href="#" id="footerDiscord" target="_blank" rel="noopener">Join Discord</a></li>
-        </ul>
-      </div>
     </div>
     <div class="footer__bottom">
       <span id="footerCopy">© 2026 AURELIA SUPPLY CO. All rights reserved.</span>
@@ -549,8 +543,7 @@ const CATEGORY_META = {
 const DEFAULT_SETTINGS = {
   storeName:'BLAINES SUPPLY CO.',
   tagline:'Verified Supplier Access, Delivered Instantly',
-  supportEmail:'BlainesBusiness1@gmail.com',
-  discordLink:'https://discord.gg/your-invite-code'
+  supportEmail:'BlainesBusiness1@gmail.com'
 };
 
 const REVIEWS = [
@@ -558,7 +551,7 @@ const REVIEWS = [
   {name:'Jordan K.',rating:5,product:'Footwear Supplier',text:'Genuinely surprised at how thorough the guide was. The QC checklist alone was worth it.'},
   {name:'Alicia R.',rating:4,product:'Electronics Supplier',text:'Solid, detailed contacts and good documentation. Would like a couple more sample photos next update.'},
   {name:'Devon P.',rating:5,product:'Streetwear Tee Supplier',text:'Delivery was instant and the fabric reference sheet saved me from a bad first order.'},
-  {name:'Sasha M.',rating:5,product:'Knit Sweater Supplier',text:'Very professional operation. The Discord community answered every question I had before I even reached out to support.'},
+  {name:'Sasha M.',rating:5,product:'Knit Sweater Supplier',text:'Very professional operation. Support answered every question I had before I even reached out.'},
   {name:'Ben O.',rating:4,product:'Sports Jerseys Supplier',text:'Good value and easy to follow. Took a day to hear back from one of the listed contacts, otherwise excellent.'},
   {name:'Priya S.',rating:5,product:'All Supplier Bundle',text:'Best value by far — one purchase and I had access to every category. Updates have been consistent too.'},
   {name:'Noah C.',rating:5,product:'Athletic Short Set Supplier',text:'Clean checkout, instant secure link, and the guide itself was more detailed than I expected.'},
@@ -752,15 +745,6 @@ function viewHome(){
       <div class="reviews-grid reveal">
         ${REVIEWS.slice(0,6).map(reviewCard).join('')}
       </div>
-    </div>
-  </section>
-
-  <section class="discord-band">
-    <div class="wrap discord-band__inner">
-      <div class="eyebrow" style="justify-content:center;">Community</div>
-      <h2>Support, updates &amp; community access</h2>
-      <p>Join thousands of members getting real-time support, early access to new supplier guides, and a direct line to the team behind ${escapeHTML(SETTINGS.storeName)}.</p>
-      <a href="${escapeAttr(SETTINGS.discordLink)}" target="_blank" rel="noopener" class="btn btn--gold">${icon('chat')} JOIN OUR DISCORD</a>
     </div>
   </section>
   `;
@@ -1194,7 +1178,6 @@ function viewContact(){
           <h3>Direct Contact</h3>
           <p style="color:var(--ink-muted);font-size:.92rem;line-height:1.7;">For order issues, resending download links, or general questions, email us directly:</p>
           <p style="margin-top:1rem;font-family:'IBM Plex Mono',monospace;color:var(--gold);font-size:1.05rem;">${escapeHTML(SETTINGS.supportEmail)}</p>
-          <div class="demo-note" style="margin-top:1.4rem;">${icon('chat')}<span>You can also reach us in the <a href="${escapeAttr(SETTINGS.discordLink)}" target="_blank" rel="noopener" style="color:var(--gold);">Discord community</a> for faster support.</span></div>
         </div>
       </div>
     </div>
@@ -1457,9 +1440,8 @@ function adminSettingsTab(){
     <div class="form-field"><label>Store Name</label><input id="sfName" value="${escapeAttr(SETTINGS.storeName)}"></div>
     <div class="form-field"><label>Tagline</label><input id="sfTagline" value="${escapeAttr(SETTINGS.tagline)}"></div>
     <div class="form-field"><label>Support Email</label><input id="sfEmail" value="${escapeAttr(SETTINGS.supportEmail)}"></div>
-    <div class="form-field"><label>Discord Invite Link</label><input id="sfDiscord" value="${escapeAttr(SETTINGS.discordLink)}"></div>
     <button class="btn btn--gold" type="submit">Save Settings</button>
-    <p style="font-size:.72rem;color:var(--ink-faint);margin-top:1rem;">To change the admin password, update ADMIN_PASSWORD_HASH in your deployment's environment variables (see README) — it isn't stored in the database.</p>
+    <p style="font-size:.72rem;color:var(--ink-faint);margin-top:1rem;">To change the admin password, update ADMIN_PASSWORD in your deployment's environment variables (see README) — it isn't stored in the database.</p>
   </form>`;
 }
 
@@ -1639,8 +1621,7 @@ function bindAdminTabEvents(){
         SETTINGS = await api('/api/settings', {method:'PUT', body:JSON.stringify({
           storeName: document.getElementById('sfName').value,
           tagline: document.getElementById('sfTagline').value,
-          supportEmail: document.getElementById('sfEmail').value,
-          discordLink: document.getElementById('sfDiscord').value
+          supportEmail: document.getElementById('sfEmail').value
         })});
         applySettingsToChrome();
         toast('Settings saved','check');
@@ -1720,7 +1701,6 @@ function openProductForm(p){
 function applySettingsToChrome(){
   document.getElementById('navLogo').innerHTML = SETTINGS.storeName.replace(/(SUPPLY.*)$/i, '<span>$1</span>');
   document.getElementById('footerLogo').textContent = SETTINGS.storeName;
-  document.getElementById('footerDiscord').href = SETTINGS.discordLink;
   document.getElementById('footerCopy').textContent = '© 2026 ' + SETTINGS.storeName + '. All rights reserved.';
 }
 
