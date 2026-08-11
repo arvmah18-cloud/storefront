@@ -229,6 +229,16 @@ label{display:block;font-size:.72rem;letter-spacing:.08em;text-transform:upperca
 .price-sale{color:var(--gold);font-size:1.15rem;font-weight:600;}
 .price-reg{color:var(--ink);font-size:1.15rem;font-weight:600;}
 .card-product__cta{margin-top:.7rem;border-top:1px solid var(--line-soft);padding-top:.8rem;font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);display:flex;align-items:center;justify-content:space-between;}
+@media (max-width:640px){
+  .grid-products{grid-template-columns:repeat(2,1fr);gap:.8rem;}
+  .card-product__body{padding:.8rem .8rem 1rem;gap:.35rem;}
+  .card-product__name{font-size:.88rem;}
+  .card-product__cat{font-size:.56rem;}
+  .price-sale,.price-reg{font-size:.92rem;}
+  .price-strike{font-size:.74rem;}
+  .card-product__cta{font-size:.6rem;margin-top:.5rem;padding-top:.6rem;}
+  .card-product__cta span{white-space:nowrap;}
+}
 
 /* catalog filter chips */
 .chips{display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:2.2rem;}
