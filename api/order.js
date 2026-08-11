@@ -7,16 +7,30 @@ module.exports = async function handler(req, res) {
   }
 
   const sessionId = req.query.session_id;
-  if (!sessionId) {
-    res.status(400).json({ error: 'Missing session_id' });
+  const email = req.query.email;
+  const orderNumber = req.query.order_number;
+
+  let order;
+  if (sessionId) {
+    const { rows } = await db.query(
+      'select id, order_number, customer_email, status from orders where stripe_session_id = $1',
+      [sessionId]
+    );
+    order = rows[0];
+  } else if (email && orderNumber) {
+    // Self-service lookup: requires both the email used at checkout AND the
+    // order number from the confirmation email/page — knowing just one isn't
+    // enough to see someone else's download links.
+    const { rows } = await db.query(
+      'select id, order_number, customer_email, status from orders where lower(customer_email) = lower($1) and order_number = $2',
+      [email, orderNumber.toUpperCase()]
+    );
+    order = rows[0];
+  } else {
+    res.status(400).json({ error: 'Provide either session_id, or both email and order_number' });
     return;
   }
 
-  const { rows: orderRows } = await db.query(
-    'select id, order_number, customer_email, status from orders where stripe_session_id = $1',
-    [sessionId]
-  );
-  const order = orderRows[0];
   if (!order) {
     res.status(404).json({ error: 'Order not found' });
     return;

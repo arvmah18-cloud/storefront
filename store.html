@@ -592,6 +592,7 @@ label{display:block;font-size:.72rem;letter-spacing:.08em;text-transform:upperca
           <li><a href="#" data-legal="notice">Legal Notice</a></li>
           <li><a href="#" data-legal="privacy">Privacy</a></li>
           <li><a href="#/contact">Contact</a></li>
+          <li><a href="#/orders">My Orders</a></li>
           <li><a href="#/admin" data-route="admin">Admin</a></li>
         </ul>
       </div>
@@ -807,6 +808,7 @@ function parseRoute(){
   if(parts[0]==='confirmation' && parts[1]) return {name:'confirmation', id:parts[1]};
   if(parts[0]==='download' && parts[1]) return {name:'download', token:parts[1]};
   if(parts[0]==='contact') return {name:'contact'};
+  if(parts[0]==='orders') return {name:'orders'};
   if(parts[0]==='admin') return {name:'admin'};
   return {name:'home'};
 }
@@ -860,6 +862,7 @@ async function render(){
   else if(route.name==='confirmation') app.innerHTML = viewConfirmation(route.id);
   else if(route.name==='download') app.innerHTML = viewDownload(route.token);
   else if(route.name==='contact') app.innerHTML = viewContact();
+  else if(route.name==='orders') app.innerHTML = viewOrders();
   else app.innerHTML = viewHome();
 
   bindViewEvents(route);
@@ -1353,6 +1356,7 @@ async function loadConfirmation(sessionId){
           </div>
           <a class="btn btn--outline btn--sm" href="#/download/${encodeURIComponent(it.downloadToken)}">${icon('download')} Download</a>
         </div>`).join('')}
+      <p style="font-size:.78rem;color:var(--ink-faint);margin-top:1.2rem;text-align:center;">Save your order number — you can look these links up again anytime on the <a href="#/orders" style="color:var(--gold);">My Orders</a> page.</p>
       <div class="center mt-lg"><a href="#/catalog" class="btn btn--gold">Continue Shopping</a></div>
     </div>`;
 }
@@ -1435,6 +1439,31 @@ function viewContact(){
           <h3>Direct Contact</h3>
           <p style="color:var(--ink-muted);font-size:.92rem;line-height:1.7;">For order issues, resending download links, or general questions, email us directly:</p>
           <p style="margin-top:1rem;font-family:'IBM Plex Mono',monospace;color:var(--gold);font-size:1.05rem;">${escapeHTML(SETTINGS.supportEmail)}</p>
+        </div>
+      </div>
+    </div>
+  </section>`;
+}
+
+/* ============================================================
+   VIEW: MY ORDERS (self-service download link lookup)
+   ============================================================ */
+function viewOrders(){
+  return `
+  <section class="section" style="padding-top:2.5rem;">
+    <div class="wrap">
+      <div class="crumbs"><a href="#/">Home</a> / <span>My Orders</span></div>
+      <div class="section-head reveal"><div class="eyebrow">Already Purchased?</div><h2>Find your download links</h2><p>Enter the email you checked out with and your order number (from your confirmation email) to pull up your download links again.</p></div>
+      <div class="checkout-grid">
+        <form class="panel-box" id="orderLookupForm">
+          <div class="form-field"><label>Email</label><input required type="email" id="olEmail" placeholder="you@email.com"></div>
+          <div class="form-field"><label>Order Number</label><input required id="olOrder" placeholder="ORD-XXXXXXXX"></div>
+          <button class="btn btn--gold btn--block" type="submit" id="olSubmitBtn">Find My Order</button>
+          <p style="font-size:.78rem;color:var(--ink-faint);margin-top:.8rem;">Can't find your order number? Contact us at <a href="mailto:${escapeAttr(SETTINGS.supportEmail)}" style="color:var(--gold);">${escapeHTML(SETTINGS.supportEmail)}</a>.</p>
+        </form>
+        <div class="panel-box" id="orderLookupResults">
+          <h3>Your Downloads</h3>
+          <p style="color:var(--ink-muted);font-size:.92rem;line-height:1.7;margin-top:.6rem;">Results will show up here once you submit the form.</p>
         </div>
       </div>
     </div>
@@ -1782,6 +1811,38 @@ function bindViewEvents(route){
         toast(err.message || 'Failed to send message');
       }finally{
         btn.disabled = false; btn.textContent = 'Send Message';
+      }
+    });
+  }
+
+  // order lookup ("my orders")
+  if(route.name==='orders'){
+    document.getElementById('orderLookupForm').addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      const btn = document.getElementById('olSubmitBtn');
+      const results = document.getElementById('orderLookupResults');
+      btn.disabled = true; btn.textContent = 'Searching…';
+      try{
+        const email = document.getElementById('olEmail').value.trim();
+        const orderNumber = document.getElementById('olOrder').value.trim();
+        const order = await api('/api/order?email='+encodeURIComponent(email)+'&order_number='+encodeURIComponent(orderNumber));
+        if(order.status !== 'paid'){
+          results.innerHTML = `<h3>Your Downloads</h3><p style="color:var(--ink-muted);font-size:.92rem;margin-top:.6rem;">This order hasn't completed payment yet.</p>`;
+        } else {
+          results.innerHTML = `<h3>Your Downloads</h3>` + order.items.map(it=>`
+            <div class="download-card" style="margin-top:1rem;">
+              <div class="download-card__tile">${icon('download')}</div>
+              <div class="download-card__info">
+                <div class="download-card__name">${escapeHTML(it.name)}</div>
+                <div class="download-card__meta">${it.downloadsUsed}/${it.maxDownloads} downloads used · expires ${new Date(it.expiresAt).toLocaleString()}</div>
+              </div>
+              <a class="btn btn--outline btn--sm" href="#/download/${encodeURIComponent(it.downloadToken)}">${icon('download')} Download</a>
+            </div>`).join('');
+        }
+      }catch(err){
+        results.innerHTML = `<h3>Your Downloads</h3><p style="color:var(--crimson-bright);font-size:.92rem;margin-top:.6rem;">${escapeHTML(err.message || "We couldn't find a matching order — double-check your email and order number.")}</p>`;
+      }finally{
+        btn.disabled = false; btn.textContent = 'Find My Order';
       }
     });
   }
