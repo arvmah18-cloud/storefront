@@ -58,7 +58,7 @@ module.exports = async function handler(req, res) {
       orderNumber: order.order_number,
       items: items.map((it) => ({
         name: it.name,
-        downloadUrl: `${process.env.SITE_URL}/#/download/${it.download_token}`,
+        downloadUrl: `${process.env.SITE_URL}/download/${it.download_token}`,
         maxDownloads: it.max_downloads,
       })),
     });

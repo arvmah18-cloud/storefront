@@ -51,7 +51,7 @@ async function fulfillOrder(session) {
          values ($1,$2,$3,$4,$5,$6,$7,$8)`,
         [orderId, product.id, product.name, price, line.qty, token, new Date(Date.now() + TOKEN_TTL_MS), MAX_DOWNLOADS]
       );
-      items.push({ name: product.name, downloadUrl: `${process.env.SITE_URL}/#/download/${token}`, maxDownloads: MAX_DOWNLOADS });
+      items.push({ name: product.name, downloadUrl: `${process.env.SITE_URL}/download/${token}`, maxDownloads: MAX_DOWNLOADS });
     }
 
     await client.query('commit');

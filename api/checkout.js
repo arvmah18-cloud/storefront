@@ -48,8 +48,8 @@ module.exports = async function handler(req, res) {
       mode: 'payment',
       line_items,
       customer_email: email || undefined,
-      success_url: `${siteUrl}/#/confirmation/{CHECKOUT_SESSION_ID}`,
-      cancel_url: `${siteUrl}/#/cart`,
+      success_url: `${siteUrl}/confirmation/{CHECKOUT_SESSION_ID}`,
+      cancel_url: `${siteUrl}/cart`,
       metadata: { cart: JSON.stringify(cartMeta) },
       // This account has Stripe Managed Payments on by default, which requires a
       // tax code on every product unless disabled — irrelevant for digital goods

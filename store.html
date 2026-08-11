@@ -684,8 +684,8 @@ function toast(msg, iconName){
    ROUTER
    ============================================================ */
 function parseRoute(){
-  const hash = location.hash.replace(/^#\/?/,'');
-  const parts = hash.split('/').filter(Boolean);
+  const path = location.pathname.replace(/^\/?/,'');
+  const parts = path.split('/').filter(Boolean);
   if(parts.length===0) return {name:'home'};
   if(parts[0]==='catalog') return {name:'catalog'};
   if(parts[0]==='product' && parts[1]) return {name:'product', id:parts[1]};
@@ -697,7 +697,20 @@ function parseRoute(){
   if(parts[0]==='admin') return {name:'admin'};
   return {name:'home'};
 }
-function navigate(hash){ location.hash = hash; }
+function navigate(path){
+  const clean = path.replace(/^#/,'');
+  history.pushState(null, '', clean);
+  render();
+}
+// Internal links keep their old "#/path" markup for simplicity — this
+// intercepts clicks on them and drives real pushState navigation instead
+// of letting the browser set a URL hash, so addresses stay clean (no "#/").
+document.addEventListener('click', (e)=>{
+  const a = e.target.closest('a[href^="#/"]');
+  if(!a) return;
+  e.preventDefault();
+  navigate(a.getAttribute('href'));
+});
 
 async function render(){
   const route = parseRoute();
@@ -1644,16 +1657,16 @@ function bindCartLineControls(scope){
   scope.querySelectorAll('.lineMinus').forEach(b=>b.addEventListener('click', ()=>{
     const line = CART.find(l=>l.id===b.dataset.id);
     if(line) setQty(b.dataset.id, line.qty-1);
-    if(location.hash.startsWith('#/cart')) render(); else renderDrawer();
+    if(location.pathname.startsWith('/cart')) render(); else renderDrawer();
   }));
   scope.querySelectorAll('.linePlus').forEach(b=>b.addEventListener('click', ()=>{
     const line = CART.find(l=>l.id===b.dataset.id);
     if(line) setQty(b.dataset.id, line.qty+1);
-    if(location.hash.startsWith('#/cart')) render(); else renderDrawer();
+    if(location.pathname.startsWith('/cart')) render(); else renderDrawer();
   }));
   scope.querySelectorAll('.cart-line__remove').forEach(b=>b.addEventListener('click', ()=>{
     removeLine(b.dataset.id);
-    if(location.hash.startsWith('#/cart')) render();
+    if(location.pathname.startsWith('/cart')) render();
   }));
 }
 
@@ -1686,7 +1699,7 @@ function bindAdminTabEvents(){
       }catch(err){ toast(err.message || 'Failed to resend email'); }
     }));
     document.querySelectorAll('.copyLinkBtn').forEach(b=>b.addEventListener('click', async ()=>{
-      const link = location.href.split('#')[0] + '#/download/' + b.dataset.token;
+      const link = location.origin + '/download/' + b.dataset.token;
       try{
         await navigator.clipboard.writeText(link);
         toast('Link copied to clipboard','check');
@@ -1870,7 +1883,7 @@ function capitalize(s){ return s ? s.charAt(0).toUpperCase()+s.slice(1) : s; }
   await loadAll();
   setupChrome();
   render();
-  window.addEventListener('hashchange', render);
+  window.addEventListener('popstate', render);
 })();
 </script>
 </body>
