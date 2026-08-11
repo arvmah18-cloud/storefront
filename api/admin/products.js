@@ -32,7 +32,7 @@ module.exports = async function handler(req, res) {
   if (!requireAdmin(req, res)) return;
 
   if (req.method === 'GET') {
-    const { rows } = await db.query('select * from products order by created_at asc');
+    const { rows } = await db.query(`select * from products order by (id = 'all-supplier-bundle') desc, created_at asc`);
     res.status(200).json({ products: rows.map(toClient) });
     return;
   }

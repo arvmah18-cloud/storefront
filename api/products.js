@@ -7,7 +7,7 @@ module.exports = async function handler(req, res) {
   }
   const { rows } = await db.query(
     `select id, name, category, original_price, sale_price, rating, review_count, short_description, includes, image
-     from products order by created_at asc`
+     from products order by (id = 'all-supplier-bundle') desc, created_at asc`
   );
   res.status(200).json({
     products: rows.map((p) => ({
