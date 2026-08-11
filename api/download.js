@@ -74,7 +74,19 @@ module.exports = async function handler(req, res) {
     return;
   }
 
-  const signedUrl = await createSignedDownloadUrl(item.file_key, 60);
+  let signedUrl;
+  try {
+    signedUrl = await createSignedDownloadUrl(item.file_key, 60);
+  } catch (err) {
+    // Most common cause: the product's Storage File Key doesn't match any
+    // file actually uploaded (e.g. typed in manually instead of uploaded).
+    // Fail cleanly instead of crashing, and don't burn the customer's
+    // download count on a link that never delivered anything.
+    console.error(`download failed for token ${token}, file_key "${item.file_key}":`, err.message || err);
+    res.status(503).send('This file could not be retrieved right now. Contact support and we\'ll sort it out — your download count has not been used.');
+    return;
+  }
+
   await db.query('update order_items set downloads_used = downloads_used + 1 where id = $1', [item.id]);
 
   res.writeHead(302, { Location: signedUrl });

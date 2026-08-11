@@ -1,5 +1,6 @@
 const db = require('../../lib/db');
 const { requireAdmin } = require('../../lib/auth');
+const { deliverableFileExists } = require('../../lib/storage');
 
 function slugify(name) {
   return (
@@ -39,6 +40,10 @@ module.exports = async function handler(req, res) {
 
   if (req.method === 'POST') {
     const b = req.body || {};
+    if (b.fileKey && !(await deliverableFileExists(b.fileKey))) {
+      res.status(400).json({ error: `No file named "${b.fileKey}" exists in storage. Use the Upload File button, or double-check the exact filename you typed.` });
+      return;
+    }
     const id = slugify(b.name || 'product');
     const { rows } = await db.query(
       `insert into products (id, name, category, original_price, sale_price, rating, review_count, short_description, includes, image, file_key)
@@ -52,6 +57,10 @@ module.exports = async function handler(req, res) {
   if (req.method === 'PUT') {
     const id = req.query.id;
     const b = req.body || {};
+    if (b.fileKey && !(await deliverableFileExists(b.fileKey))) {
+      res.status(400).json({ error: `No file named "${b.fileKey}" exists in storage. Use the Upload File button, or double-check the exact filename you typed.` });
+      return;
+    }
     const { rows } = await db.query(
       `update products set name=$1, category=$2, original_price=$3, sale_price=$4, short_description=$5, includes=$6, image=$7, file_key=$8, updated_at=now()
        where id=$9 returning *`,
