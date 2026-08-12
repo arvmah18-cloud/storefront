@@ -1177,6 +1177,7 @@ function renderDrawer(){
     <div class="drawer__subtotal"><span>Subtotal</span><span>${fmt(cartSubtotal())}</span></div>
     <a href="#/checkout" class="btn btn--gold btn--block">Checkout</a>
     <a href="#/cart" class="btn btn--ghost" style="display:flex;justify-content:center;margin-top:.8rem;">View Cart Page</a>`;
+  bindCartLineControls(body);
 }
 function openDrawer(){
   renderDrawer();
